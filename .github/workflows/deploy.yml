@@ -63,6 +63,7 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          skip-dirs: '/usr/local/lib/node_modules/npm'
 
       - name: Build and Push Frontend
         uses: docker/build-push-action@v5
@@ -83,6 +84,7 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          skip-dirs: '/usr/local/lib/node_modules/npm'
 
   deploy-backend:
     needs: build-and-push
