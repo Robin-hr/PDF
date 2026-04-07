@@ -1,8 +1,7 @@
 /* PDF Forge – app.js  (Crop + Scanner Edition) */
 
-// IMPORTANT: Replace 'localhost' with the Public IP or Domain of your Backend EC2 instance.
-// Example: const API_BASE = 'http://203.0.113.50:5000';
-const API_BASE = 'http://localhost:5000';
+// Dynamic API URL based on current frontend address
+const API_BASE = window.location.origin + '/api';
 // ── State ─────────────────────────────────────────────────────
 // { file, objectUrl, crop:{x,y,w,h}|null, enhance:'none'|'bw'|'scan'|'enhance' }
 let imageFiles = [];
