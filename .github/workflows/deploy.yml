@@ -31,13 +31,12 @@ jobs:
         run: |
           sed -i "s/INTERNAL_BACKEND_IP/${{ secrets.BACKEND_PRIVATE_IP }}/g" frontend/nginx.conf
 
+      - name: Setup Snyk CLI
+        uses: snyk/actions/setup@master
       - name: Snyk Open Source Analysis (SCA)
-        uses: snyk/actions/node@master
+        run: snyk test backend --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high backend
-          command: test
 
       - name: Hadolint Dockerfile Linter
         uses: hadolint/hadolint-action@v3.1.0
