@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Convert images to PDF. Crop, enhance and scan documents instantly." />
+  <title>PDF Scanner – Image to PDF Converter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <!-- Cropper.js -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Orbs -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">PDF<span class="logo-accent">Scanner</span></span>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Hero -->
+    <section class="hero">
+      <h1 class="hero-title">Convert Images to<br /><span class="gradient-text">Beautiful PDFs</span></h1>
+      <p class="hero-sub">Drag &amp; drop · Crop &amp; Enhance · Works like a Document Scanner</p>
+    </section>
+
+    <!-- Drop Zone -->
+    <div class="card drop-card" id="dropZone">
+      <input type="file" id="fileInput" accept="image/*" multiple hidden />
+      <div class="drop-inner" id="dropInner">
+        <div class="drop-icon-wrap">
+          <div class="drop-icon">🖼️</div>
+        </div>
+        <p class="drop-title">Drop your images here</p>
+        <p class="drop-sub">or <button class="link-btn" id="browseBtn">browse files</button></p>
+        <p class="drop-formats">JPG · PNG · WEBP · BMP · GIF · TIFF</p>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <section class="preview-section" id="previewSection" hidden>
+      <div class="section-header">
+        <h2 class="section-title">Images <span class="count-badge" id="countBadge">0</span></h2>
+        <div class="section-actions">
+          <button class="btn btn-ghost" id="clearAllBtn">🗑 Clear All</button>
+          <button class="btn btn-ghost" id="addMoreBtn">➕ Add More</button>
+        </div>
+      </div>
+      <div class="preview-grid" id="previewGrid"></div>
+    </section>
+
+    <!-- Settings -->
+    <section class="settings-section" id="settingsSection" hidden>
+      <div class="card settings-card">
+        <h2 class="settings-title">⚙️ PDF Settings</h2>
+        <div class="settings-grid">
+          <div class="setting-group">
+            <label class="setting-label" for="pdfName">PDF File Name</label>
+            <input class="setting-input" type="text" id="pdfName" value="converted" placeholder="my-document" />
+          </div>
+          <div class="setting-group">
+            <label class="setting-label" for="pageSize">Page Size</label>
+            <select class="setting-select" id="pageSize">
+              <option value="A4" selected>A4 (210 × 297mm)</option>
+              <option value="A3">A3 (297 × 420mm)</option>
+              <option value="A5">A5 (148 × 210mm)</option>
+              <option value="Letter">Letter (8.5 × 11in)</option>
+              <option value="Legal">Legal (8.5 × 14in)</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label" for="orientation">Orientation</label>
+            <select class="setting-select" id="orientation">
+              <option value="auto" selected>Auto (per image)</option>
+              <option value="portrait">Portrait</option>
+              <option value="landscape">Landscape</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label" for="fitMode">Image Fit</label>
+            <select class="setting-select" id="fitMode">
+              <option value="stretch" selected>Stretch to Page (best for Scanner)</option>
+              <option value="fit">Fit (preserve ratio)</option>
+              <option value="fill">Fill (crop to cover)</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label" for="margin">Margin (pt) <span class="margin-val"
+                id="marginVal">30</span></label>
+            <input class="setting-range" type="range" id="margin" min="0" max="80" value="30" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Convert -->
+    <div class="convert-wrap" id="convertWrap" hidden>
+      <button class="btn btn-convert" id="convertBtn">
+        <span class="btn-icon">📄</span>
+        <span class="btn-label">Convert to PDF</span>
+      </button>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progressWrap" hidden>
+      <div class="card progress-card">
+        <div class="progress-header">
+          <span class="progress-label" id="progressLabel">Converting…</span>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <p class="progress-sub" id="progressSub">Building your PDF…</p>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-wrap" id="resultWrap" hidden>
+      <div class="card result-card">
+        <div class="result-icon">✅</div>
+        <h2 class="result-title">Your PDF is Ready!</h2>
+        <div class="result-meta" id="resultMeta"></div>
+        <div class="result-actions">
+          <a class="btn btn-download" id="downloadBtn" href="#" download>⬇ Download PDF</a>
+          <button class="btn btn-ghost" id="convertAnotherBtn">🔄 Convert Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-wrap" id="errorWrap" hidden>
+      <div class="card error-card">
+        <div class="error-icon">❌</div>
+        <h2 class="error-title">Conversion Failed</h2>
+        <p class="error-msg" id="errorMsg"></p>
+        <button class="btn btn-ghost" id="retryBtn">↩ Try Again</button>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <section class="features">
+      <div class="feature-card card" id="featureCrop" style="cursor:pointer" title="Click to open Crop Editor">
+        <div class="feature-icon">✂️</div>
+        <h3>Crop & Align</h3>
+        <p>Drag the crop handles to trim each image. Rule-of-thirds grid keeps things aligned.</p>
+      </div>
+      <div class="feature-card card" id="featureScan" style="cursor:pointer"
+        title="Click to apply Scanner effect to all">
+        <div class="feature-icon">📄</div>
+        <h3>Document Scanner</h3>
+        <p>Apply B&amp;W + sharpen to make photos look like real scanned documents.</p>
+      </div>
+      <div class="feature-card card" id="featurePdf" style="cursor:pointer" title="Click to Convert to PDF">
+        <div class="feature-icon">⚡</div>
+        <h3>Instant PDF</h3>
+        <p>Server-side Sharp processing creates crisp, optimized PDFs in seconds.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>Created by HR</p>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════
+     CROP MODAL
+════════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="cropModal" hidden>
+    <div class="modal">
+
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <span class="modal-title-icon">✂️</span>
+          <h2 class="modal-title">Crop &amp; Enhance</h2>
+        </div>
+        <button class="modal-close" id="cropModalClose" title="Close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Drop custom canvas, use Cropper.js image target -->
+        <div class="canvas-wrap" style="height: 50vh; min-height: 350px;">
+          <img id="cropTarget" style="display:block;max-width:100%;" />
+        </div>
+
+        <!-- Enhance panel -->
+        <div class="enhance-panel">
+          <p class="enhance-label">Enhancement Mode</p>
+          <div class="enhance-btns">
+            <button class="enhance-btn active" data-enhance="none">
+              <span class="eb-icon">🖼️</span>
+              <span class="eb-label">Original</span>
+            </button>
+            <button class="enhance-btn" data-enhance="bw">
+              <span class="eb-icon">📄</span>
+              <span class="eb-label">Document<br /><small>B&amp;W + Sharpen</small></span>
+            </button>
+            <button class="enhance-btn" data-enhance="scan">
+              <span class="eb-icon">🖨️</span>
+              <span class="eb-label">Scanner<br /><small>High Contrast</small></span>
+            </button>
+            <button class="enhance-btn" data-enhance="enhance">
+              <span class="eb-icon">✨</span>
+              <span class="eb-label">Auto Enhance<br /><small>Color Boost</small></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="flex-wrap: wrap; gap: 12px;">
+        <!-- Rotation Slider -->
+        <div
+          style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 250px; background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 8px;">
+          <span style="font-size: 0.8rem; color: #ddd;">Free Rotation:</span>
+          <input type="range" id="freeRotate" min="-180" max="180" value="0" style="flex:1">
+          <span id="rotateVal" style="font-size: 0.8rem; min-width: 35px;">0°</span>
+          <button class="btn btn-ghost" id="cropReset" style="padding: 4px 8px; font-size: 0.8rem;">Reset All</button>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn btn-ghost" id="cropCancel">Cancel</button>
+        <button class="btn btn-convert" id="cropApply" style="padding:12px 28px">✓ Apply Crop</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
