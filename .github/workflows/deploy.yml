@@ -7,9 +7,19 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      # Calculate version with offset (v5, v6, etc.)
+      - name: Set Version
+        id: set-version
+        run: |
+          VERSION="v$(( ${{ github.run_number }} + 4 ))"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "BUILD_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -17,7 +27,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Prepare Backend IP in Nginx Config
       - name: Inject Private Backend IP
         run: |
           sed -i "s/INTERNAL_BACKEND_IP/${{ secrets.BACKEND_PRIVATE_IP }}/g" frontend/nginx.conf
@@ -25,7 +34,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Build and Push Backend
       - name: Build and Push Backend
         uses: docker/build-push-action@v5
         with:
@@ -34,9 +42,8 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/pdf-backend:latest
-            ${{ secrets.DOCKER_USERNAME }}/pdf-backend:v${{ github.run_number + 4 }}
+            ${{ secrets.DOCKER_USERNAME }}/pdf-backend:${{ steps.set-version.outputs.version }}
 
-      # Build and Push Frontend
       - name: Build and Push Frontend
         uses: docker/build-push-action@v5
         with:
@@ -45,7 +52,7 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:latest
-            ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:v${{ github.run_number + 4 }}
+            ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ steps.set-version.outputs.version }}
 
   deploy-backend:
     needs: build-and-push
@@ -62,11 +69,11 @@ jobs:
           proxy_key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker pull ${{ secrets.DOCKER_USERNAME }}/pdf-backend:v${{ github.run_number + 4 }}
+            docker pull ${{ secrets.DOCKER_USERNAME }}/pdf-backend:${{ needs.build-and-push.outputs.version }}
             docker stop pdf-backend || true
             docker rm pdf-backend || true
-            docker run -d --name pdf-backend -p 5000:5000 --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/pdf-backend:v${{ github.run_number + 4 }}
-            echo "Successfully deployed Backend v${{ github.run_number + 4 }} - This is done! 🚀"
+            docker run -d --name pdf-backend -p 5000:5000 --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/pdf-backend:${{ needs.build-and-push.outputs.version }}
+            echo "Successfully deployed Backend ${{ needs.build-and-push.outputs.version }} - This is done! 🚀"
 
   deploy-frontend:
     needs: build-and-push
@@ -80,8 +87,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker pull ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:v${{ github.run_number + 4 }}
+            docker pull ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ needs.build-and-push.outputs.version }}
             docker stop pdf-frontend || true
             docker rm pdf-frontend || true
-            docker run -d --name pdf-frontend -p 80:80 --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:v${{ github.run_number + 4 }}
-            echo "Successfully deployed Frontend v${{ github.run_number + 4 }} - This is done! 🚀"
+            docker run -d --name pdf-frontend -p 80:80 --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ needs.build-and-push.outputs.version }}
+            echo "Successfully deployed Frontend ${{ needs.build-and-push.outputs.version }} - This is done! 🚀"
