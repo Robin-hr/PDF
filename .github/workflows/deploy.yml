@@ -68,11 +68,11 @@ jobs:
           proxy_username: ec2-user
           proxy_key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker pull ${{ secrets.DOCKER_USERNAME }}/pdf-backend:${{ needs.build-and-push.outputs.version }}
-            docker stop pdf-backend || true
-            docker rm pdf-backend || true
-            docker run -d --name pdf-backend -p 5000:5000 --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/pdf-backend:${{ needs.build-and-push.outputs.version }}
+            sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/pdf-backend:${{ needs.build-and-push.outputs.version }}
+            sudo docker stop pdf-backend || true
+            sudo docker rm pdf-backend || true
+            sudo docker run -d --name pdf-backend -p 5000:5000 --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/pdf-backend:${{ needs.build-and-push.outputs.version }}
             echo "Successfully deployed Backend ${{ needs.build-and-push.outputs.version }} - This is done! 🚀"
 
   deploy-frontend:
@@ -86,9 +86,9 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker pull ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ needs.build-and-push.outputs.version }}
-            docker stop pdf-frontend || true
-            docker rm pdf-frontend || true
-            docker run -d --name pdf-frontend -p 80:80 --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ needs.build-and-push.outputs.version }}
+            sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ needs.build-and-push.outputs.version }}
+            sudo docker stop pdf-frontend || true
+            sudo docker rm pdf-frontend || true
+            sudo docker run -d --name pdf-frontend -p 80:80 --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ needs.build-and-push.outputs.version }}
             echo "Successfully deployed Frontend ${{ needs.build-and-push.outputs.version }} - This is done! 🚀"
