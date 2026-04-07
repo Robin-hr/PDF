@@ -1,5 +1,8 @@
 FROM nginx:alpine
 
+# Patch OS-level vulnerabilities in Alpine (libpng, zlib, etc.)
+RUN apk update && apk upgrade --no-cache
+
 # Create non-root user and fix permissions for Nginx on port 8080
 RUN touch /var/run/nginx.pid && \
     chown -R nginx:nginx /var/run/nginx.pid /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
