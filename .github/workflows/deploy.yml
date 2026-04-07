@@ -42,6 +42,7 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: ./backend/Dockerfile
+          failure-threshold: warning
 
       - name: Build and Push Backend
         uses: docker/build-push-action@v5

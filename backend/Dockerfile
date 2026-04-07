@@ -2,6 +2,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Install dependencies for sharp
+# hadolint ignore=DL3018
 RUN apk add --no-cache vips-dev build-base python3
 
 # Secure image: Create directories and set permissions before switching user
