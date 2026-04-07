@@ -1,7 +1,8 @@
 /* PDF Forge – app.js  (Crop + Scanner Edition) */
 
 // Dynamic API URL based on current frontend address
-const API_BASE = window.location.origin + '/api';
+// Dynamic API URL – uses Nginx proxy (e.g., http://your-ip/api)
+const API_BASE = window.location.origin;
 // ── State ─────────────────────────────────────────────────────
 // { file, objectUrl, crop:{x,y,w,h}|null, enhance:'none'|'bw'|'scan'|'enhance' }
 let imageFiles = [];

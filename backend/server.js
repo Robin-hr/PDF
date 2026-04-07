@@ -32,8 +32,8 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => cb(null, `${uuidv4()}${path.extname(file.originalname).toLowerCase()}`)
 });
 const fileFilter = (req, file, cb) => {
-  const ok = ['image/jpeg','image/png','image/webp','image/gif','image/bmp','image/tiff'];
-  ok.includes(file.mimetype) ? cb(null, true) : cb(new Error(`Unsupported: ${file.mimetype}`), false);
+  const ok = ['image/jpeg','image/png','image/webp','image/gif','image/bmp','image/tiff','image/heic','image/heif'];
+  ok.includes(file.mimetype) ? cb(null, true) : cb(new Error(`Unsupported image type: ${file.mimetype}. Please use JPEG, PNG or WebP.`), false);
 };
 const upload = multer({ storage, fileFilter, limits: { fileSize: 50*1024*1024, files: 50 } });
 
@@ -124,8 +124,9 @@ app.post('/api/convert', upload.array('images', 50), async (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  if (err.code === 'LIMIT_FILE_SIZE')  return res.status(400).json({ error: 'File too large (max 50MB).' });
-  if (err.code === 'LIMIT_FILE_COUNT') return res.status(400).json({ error: 'Too many files (max 50).' });
+  console.error('[Global Error]:', err);
+  if (err.code === 'LIMIT_FILE_SIZE')  return res.status(400).json({ error: 'One or more files are too large (max 50MB per file).' });
+  if (err.code === 'LIMIT_FILE_COUNT') return res.status(400).json({ error: 'Too many files uploaded at once (max 50).' });
   res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
