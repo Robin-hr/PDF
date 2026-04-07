@@ -17,11 +17,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
   background-color: var(--bg);
   background-image: 
-    radial-gradient(at 0% 0%, hsla(253, 100%, 65%, 0.15) 0, transparent 50%), 
-    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 0.3) 0, transparent 50%), 
-    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 0.2) 0, transparent 50%),
-    radial-gradient(at 0% 100%, hsla(253, 100%, 65%, 0.1) 0, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(190, 80%, 40%, 0.15) 0, transparent 50%);
+    radial-gradient(at 0% 0%, hsla(0, 100%, 65%, 0.25) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(10, 80%, 40%, 0.4) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(350, 60%, 35%, 0.3) 0, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(0, 100%, 50%, 0.15) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(330, 90%, 45%, 0.2) 0, transparent 50%);
   filter: blur(40px);
   animation: colorBlend 15s ease-in-out infinite alternate;
 }
