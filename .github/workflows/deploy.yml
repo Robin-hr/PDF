@@ -31,8 +31,19 @@ jobs:
         run: |
           sed -i "s/INTERNAL_BACKEND_IP/${{ secrets.BACKEND_PRIVATE_IP }}/g" frontend/nginx.conf
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Snyk Open Source Analysis (SCA)
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+          command: test
+          directory: ./backend
+
+      - name: Hadolint Dockerfile Linter
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ./backend/Dockerfile
 
       - name: Build and Push Backend
         uses: docker/build-push-action@v5
@@ -44,6 +55,16 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/pdf-backend:latest
             ${{ secrets.DOCKER_USERNAME }}/pdf-backend:${{ steps.set-version.outputs.version }}
 
+      - name: Run Trivy Scanner (Backend)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/pdf-backend:${{ steps.set-version.outputs.version }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
       - name: Build and Push Frontend
         uses: docker/build-push-action@v5
         with:
@@ -53,6 +74,16 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:latest
             ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ steps.set-version.outputs.version }}
+
+      - name: Run Trivy Scanner (Frontend)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ steps.set-version.outputs.version }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   deploy-backend:
     needs: build-and-push
@@ -90,5 +121,5 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ needs.build-and-push.outputs.version }}
             sudo docker stop pdf-frontend || true
             sudo docker rm pdf-frontend || true
-            sudo docker run -d --name pdf-frontend -p 80:80 --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ needs.build-and-push.outputs.version }}
+            sudo docker run -d --name pdf-frontend -p 80:8080 --restart unless-stopped ${{ secrets.DOCKER_USERNAME }}/pdf-frontend:${{ needs.build-and-push.outputs.version }}
             echo "Successfully deployed Frontend ${{ needs.build-and-push.outputs.version }} - This is done! 🚀"

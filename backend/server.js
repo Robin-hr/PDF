@@ -3,12 +3,22 @@ const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const PDFDocument = require('pdfkit');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const PORT = 5000;
+
+// Security Middleware
+app.use(helmet());
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 100, 
+  message: { error: 'Too many requests from this IP, please try again after 15 minutes.' }
+}));
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
