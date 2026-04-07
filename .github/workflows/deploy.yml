@@ -37,6 +37,12 @@ jobs:
         run: snyk test backend --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      
+      - name: Snyk Dashboard Monitor
+        run: snyk monitor backend
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        if: always() # Ensure results are synced even if 'test' fails
 
       - name: Hadolint Dockerfile Linter
         uses: hadolint/hadolint-action@v3.1.0
